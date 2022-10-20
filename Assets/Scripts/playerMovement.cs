@@ -15,8 +15,9 @@ public class playerMovement : MonoBehaviour
     private float moveDirection;
 
     public Rigidbody playerRB;
-    public bool isGrounded;
+    private bool isGrounded;
     public float moveSpeed;
+    public float jumpForce;
 
     // Start is called before the first frame update
     private void OnEnable()
@@ -44,7 +45,7 @@ public class playerMovement : MonoBehaviour
 
         if (isGrounded && Input.GetKey("w"))
         {
-            playerRB.AddForce(0, 50, 0, ForceMode.Acceleration);
+            playerRB.AddForce(0, jumpForce, 0, ForceMode.Acceleration);
             isGrounded = false;
         }
 
@@ -54,7 +55,7 @@ public class playerMovement : MonoBehaviour
         }
         else
         {
-            playerRB.velocity = new Vector3(0, playerRB.velocity.y, moveDirection * moveSpeed);
+            playerRB.velocity = new Vector3(0, playerRB.velocity.y, -moveDirection * moveSpeed);
         }
         
        
