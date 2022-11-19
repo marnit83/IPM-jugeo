@@ -1,0 +1,3 @@
+Input system
+cinemachine
+universal render pipeline (URP): ir a project settings y pasarle el universal renderer en el apartado de renderizado
