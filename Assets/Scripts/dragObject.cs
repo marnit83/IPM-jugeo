@@ -7,21 +7,33 @@ public class dragObject : MonoBehaviour
     // Start is called before the first frame update
     private Vector3 mouseOffset;
     private float mouseZCoord;
-    public float maxForce = 3;
+    public bool drag;
+    public bool reset = true;
+    private Vector3 posInicial;
 
+    [Header("Drag")]
+    public float maxForce = 3;
     //variables para alinear el cubo
     private int ejeX;
     private float ejeY;
     private int ejeZ;
     private Vector3 alinearCam1;
     private Vector3 alinearCam2;
-    private Vector3 posInicial;
     private Vector3 nullVelocity = new Vector3(0,0,0);
 
+    [Header("Color")]
+    //variables para el cambio de color
+    public Color initialColor;
+    public Color mouseOverColor;
+    private bool mouseOver = false;
+    Renderer playerRenderer;
+    
+    [Header("Variables externas")]
     [SerializeField]
     private cameraSwitcher cameraSwitcher;
     [SerializeField]
     private Rigidbody obstacleRb;
+    
 
     private void Start()
     {
@@ -29,6 +41,9 @@ public class dragObject : MonoBehaviour
 
         ejeZ = (int)posInicial.z;
         ejeX = (int)posInicial.x;
+
+        playerRenderer = this.GetComponent<Renderer>();
+        obstacleRb = this.GetComponent<Rigidbody>();
     }
     private void Update()
     {
@@ -53,11 +68,35 @@ public class dragObject : MonoBehaviour
             mouseOffset.z = -maxForce;
         }
 
-        if(transform.position.y < -20)
+        if (transform.position.y < -20)
         {
             transform.position = posInicial;
             obstacleRb.velocity = nullVelocity;
         }
+        if(reset && Input.GetKey("r"))
+        {
+            transform.position = posInicial;
+        }
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if(collision.gameObject.tag == "Finish")
+        {
+            reset = false;
+        }
+    }
+
+    private void OnMouseEnter()
+    {
+        mouseOver = true;
+        playerRenderer.material.SetColor("_Color", mouseOverColor);
+    }
+
+    private void OnMouseExit()
+    {
+        mouseOver = false;
+        playerRenderer.material.SetColor("_Color", initialColor);
     }
 
     private void OnMouseDown()
@@ -65,18 +104,34 @@ public class dragObject : MonoBehaviour
         mouseZCoord = Camera.main.WorldToScreenPoint(gameObject.transform.position).z;
     }
 
+    private void OnMouseUp()
+    {
+        playerRenderer.material.SetColor("_Color", initialColor);
+        obstacleRb.detectCollisions = true;
+    }
+
     void OnMouseDrag()
     {
-        //transform.position = GetMouseWorldPos() + mouseOffset;
-        if (cameraSwitcher.camara1)
+        if (reset)
         {
-            obstacleRb.AddForce(-mouseOffset.x*10 / obstacleRb.mass, 0, 0, ForceMode.Force);
+            playerRenderer.material.SetColor("_Color", mouseOverColor);
+            if (drag)
+            {
+                if (cameraSwitcher.camara1)
+                {
+                    obstacleRb.AddForce(-mouseOffset.x * 10 / obstacleRb.mass, 0, 0, ForceMode.Force);
+                }
+                else
+                {
+                    obstacleRb.AddForce(0, 0, -mouseOffset.z * 10 / obstacleRb.mass, ForceMode.Force);
+                }
+            }
+            else
+            {
+                obstacleRb.detectCollisions = false;
+                transform.position = GetMouseWorldPos() + mouseOffset;
+            }
         }
-        else
-        {
-            obstacleRb.AddForce(0, 0, -mouseOffset.z*10 / obstacleRb.mass, ForceMode.Force);
-        }
-
         //Debug.Log(mouseOffset);
     }
 
