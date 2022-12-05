@@ -14,6 +14,9 @@ public class cameraSwitcher : MonoBehaviour
     
     public bool camara1 = true;
 
+    public Animator changeCamera;
+
+
     private void Awake()
     {
 
@@ -22,25 +25,31 @@ public class cameraSwitcher : MonoBehaviour
     private void OnEnable()
     {
         action.Enable();
+
     }
 
     private void OnDisable()
     {
         action.Disable();
+       
     }
 
     void Start()
     {
         action.performed += _ => SwitchPriority();
+        
     }
 
     public void SwitchPriority()
     {
-        
+        changeCamera.Play("CameraSwap");
+
         if (camara1)
         {
             vCam1.Priority = 0;
             vCam2.Priority = 1;
+
+            
         }
         else
         {
@@ -48,8 +57,18 @@ public class cameraSwitcher : MonoBehaviour
             vCam2.Priority = 0;
         }
         camara1 = !camara1;
+        
     }
 
-   
+    ////////////*********************////////////
+    /*
+    IEnumerator ChangeCamera()
+     {
+         //Play animation
+         //changeCamera.SetTrigger("SwapCurtains");
+     }
+    */
+    ////////////*********************////////////
+
 
 }

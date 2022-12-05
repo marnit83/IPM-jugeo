@@ -8,8 +8,11 @@ public class dragObject : MonoBehaviour
     private Vector3 mouseOffset;
     private float mouseZCoord;
     public bool drag;
+
+    //RESET
     public bool reset = true;
     private Vector3 posInicial;
+    private Quaternion rotInicial;
 
     [Header("Drag")]
     public float maxForce = 3;
@@ -23,8 +26,10 @@ public class dragObject : MonoBehaviour
 
     [Header("Color")]
     //variables para el cambio de color
-    public Color initialColor;
-    public Color mouseOverColor;
+    //public Color initialColor;
+    //public Color mouseOverColor;
+    public Texture texturaInicial;
+    public Texture texturaMouseOver;
     private bool mouseOver = false;
     Renderer playerRenderer;
     
@@ -38,6 +43,7 @@ public class dragObject : MonoBehaviour
     private void Start()
     {
         posInicial = transform.position;
+        rotInicial = transform.rotation;
 
         ejeZ = (int)posInicial.z;
         ejeX = (int)posInicial.x;
@@ -47,7 +53,6 @@ public class dragObject : MonoBehaviour
     }
     private void Update()
     {
-        alignPosition();
         mouseOffset = gameObject.transform.position - GetMouseWorldPos();
         if(mouseOffset.x > maxForce)
         {
@@ -73,10 +78,6 @@ public class dragObject : MonoBehaviour
             transform.position = posInicial;
             obstacleRb.velocity = nullVelocity;
         }
-        if(reset && Input.GetKey("r"))
-        {
-            transform.position = posInicial;
-        }
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -90,13 +91,16 @@ public class dragObject : MonoBehaviour
     private void OnMouseEnter()
     {
         mouseOver = true;
-        playerRenderer.material.SetColor("_Color", mouseOverColor);
+       // playerRenderer.material.SetColor("_Color", mouseOverColor);
+        playerRenderer.material.SetTexture("_MainTex", texturaMouseOver);
+        //Debug.Log("OnMouseEnter");
     }
 
     private void OnMouseExit()
     {
         mouseOver = false;
-        playerRenderer.material.SetColor("_Color", initialColor);
+       // playerRenderer.material.SetColor("_Color", initialColor);
+        playerRenderer.material.SetTexture("_MainTex", texturaInicial);
     }
 
     private void OnMouseDown()
@@ -106,7 +110,8 @@ public class dragObject : MonoBehaviour
 
     private void OnMouseUp()
     {
-        playerRenderer.material.SetColor("_Color", initialColor);
+       // playerRenderer.material.SetColor("_Color", initialColor);
+        playerRenderer.material.SetTexture("_MainTex", texturaInicial);
         obstacleRb.detectCollisions = true;
     }
 
@@ -114,7 +119,9 @@ public class dragObject : MonoBehaviour
     {
         if (reset)
         {
-            playerRenderer.material.SetColor("_Color", mouseOverColor);
+           // playerRenderer.material.SetColor("_Color", mouseOverColor);
+            playerRenderer.material.SetTexture("_MainTex", texturaMouseOver);
+
             if (drag)
             {
                 if (cameraSwitcher.camara1)
@@ -143,21 +150,16 @@ public class dragObject : MonoBehaviour
         return Camera.main.ScreenToWorldPoint(mousePoint);
     }
 
-    void alignPosition()
+
+    void OnReset()
     {
-        ejeY = transform.position.y;
-        alinearCam1 = new Vector3(transform.position.x, ejeY, ejeZ);
-        alinearCam2 = new Vector3(ejeX, ejeY, transform.position.z);
-        //Debug.Log(ejeZ);
-        if (cameraSwitcher.camara1)
+        if (reset)
         {
-            transform.position = alinearCam1;
-            ejeX = (int)transform.position.x;
-        }
-        else
-        {
-            transform.position = alinearCam2;
-            ejeZ = (int) transform.position.z;
+            Debug.Log("OnReset");
+            transform.position = posInicial;
+            transform.rotation = rotInicial;
+            obstacleRb.velocity = Vector3.zero;
+            obstacleRb.angularVelocity = Vector3.zero;
         }
     }
 }
